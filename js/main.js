@@ -28,6 +28,33 @@ var CONFIG = {
 
 $(function () {
 
+  /* Payment Details: tap/click to copy the sort code or account number */
+  $('.copy-field').on('click', function () {
+    var $btn = $(this);
+    var text = String($btn.data('copy'));
+    function showCopied() {
+      clearTimeout($btn.data('copyTimer'));
+      $btn.addClass('is-copied');
+      var t = setTimeout(function () { $btn.removeClass('is-copied'); }, 1600);
+      $btn.data('copyTimer', t);
+    }
+    function legacyCopy() {
+      var $tmp = $('<textarea readonly></textarea>').val(text).css({ position: 'fixed', top: '-1000px', left: '-1000px' });
+      $('body').append($tmp);
+      $tmp[0].focus();
+      $tmp[0].select();
+      $tmp[0].setSelectionRange(0, text.length);
+      try { document.execCommand('copy'); } catch (e) {}
+      $tmp.remove();
+      showCopied();
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(showCopied, legacyCopy);
+    } else {
+      legacyCopy();
+    }
+  });
+
   /* Photo slots */
   $('[data-slot]').each(function () {
     if ($(this).children('img').length) return;   // photo already in the HTML
